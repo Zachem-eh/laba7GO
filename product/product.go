@@ -2,14 +2,6 @@ package product
 
 import "fmt"
 
-type Product struct {
-	ID    uint
-	Name  string
-	Price float64
-}
-
-var AllProducts = make(map[uint]Product)
-
 func init() {
 	first, _ := NewProduct("Пакет для покупок", 12)
 	AddProduct(first)
@@ -17,6 +9,28 @@ func init() {
 	AddProduct(second)
 	third, _ := NewProduct("Правый тапок", 51)
 	AddProduct(third)
+}
+
+type Product struct {
+	ID    uint
+	Name  string
+	Price float64
+}
+
+func (pr Product) String() string {
+	return fmt.Sprintf("ID товара: %d\nНазвание товара: %s\nЦена: %.2f", pr.ID, pr.Name, pr.Price)
+}
+
+var AllProducts = make(map[uint]Product)
+
+func GetNextID() uint {
+	var maxID uint = 0
+	for id := range AllProducts {
+		if id > maxID {
+			maxID = id
+		}
+	}
+	return maxID + 1
 }
 
 func NewProduct(name string, price float64) (*Product, error) {
@@ -35,20 +49,6 @@ func NewProduct(name string, price float64) (*Product, error) {
 		Name:  name,
 		Price: price,
 	}, nil
-}
-
-func (pr Product) String() string {
-	return fmt.Sprintf("ID товара: %d\nНазвание товара: %s\nЦена: %.2f", pr.ID, pr.Name, pr.Price)
-}
-
-func GetNextID() uint {
-	var maxID uint = 0
-	for id := range AllProducts {
-		if id > maxID {
-			maxID = id
-		}
-	}
-	return maxID + 1
 }
 
 func GetProductByID(id uint) (Product, error) {
