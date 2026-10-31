@@ -8,7 +8,16 @@ type Product struct {
 	Price float64
 }
 
-var AllProduts = make(map[uint]Product)
+var AllProducts = make(map[uint]Product)
+
+func init() {
+	first, _ := NewProduct("Пакет для покупок", 12)
+	AddProduct(first)
+	second, _ := NewProduct("Левый тапок", 49)
+	AddProduct(second)
+	third, _ := NewProduct("Правый тапок", 51)
+	AddProduct(third)
+}
 
 func NewProduct(name string, price float64) (*Product, error) {
 	if name == "" {
@@ -34,7 +43,7 @@ func (pr Product) String() string {
 
 func GetNextID() uint {
 	var maxID uint = 0
-	for id := range AllProduts {
+	for id := range AllProducts {
 		if id > maxID {
 			maxID = id
 		}
@@ -43,7 +52,7 @@ func GetNextID() uint {
 }
 
 func GetProductByID(id uint) (Product, error) {
-	p, exists := AllProduts[id]
+	p, exists := AllProducts[id]
 	if !exists {
 		return Product{}, fmt.Errorf("товар не найден")
 	}
@@ -52,15 +61,15 @@ func GetProductByID(id uint) (Product, error) {
 
 // Добавление
 func AddProduct(p *Product) error {
-	if _, exists := AllProduts[p.ID]; exists {
+	if _, exists := AllProducts[p.ID]; exists {
 		return fmt.Errorf("товар с ID %d уже существует", p.ID)
 	}
-	AllProduts[p.ID] = *p
+	AllProducts[p.ID] = *p
 	return nil
 }
 
 func PrintAllProducts() {
-	for _, p := range AllProduts {
+	for _, p := range AllProducts {
 		fmt.Println(p)
 		fmt.Println("--------")
 	}
