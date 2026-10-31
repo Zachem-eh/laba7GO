@@ -1,8 +1,6 @@
 package product
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Product struct {
 	ID    uint
