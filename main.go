@@ -31,6 +31,7 @@ func main() {
 
 		fmt.Println("Меню команд:")
 		fmt.Println("1 - Вывести ассортимент")
+		fmt.Println("2 - Добавить товар в ассортимент")
 		fmt.Println("0 - Завершить работу")
 		fmt.Println("Выберите пункт из меню управления: ")
 
@@ -49,6 +50,27 @@ func main() {
 		case 1:
 			fmt.Println("\nАссортимент продуктов:")
 			product.PrintAllProducts()
+		case 2:
+			fmt.Println("\nВведите название:")
+			name, _ := reader.ReadString('\n')
+			name = strings.TrimSpace(name)
+
+			fmt.Println("\nВведите цену:")
+			input, _ := reader.ReadString('\n')
+			input = strings.TrimSpace(input)
+			price, err := strconv.ParseFloat(input, 64)
+			if err != nil {
+				fmt.Println("Некорректный ввод! Пожалуйста, введите число.")
+				continue
+			}
+			new_pr, err := product.NewProduct(name, price)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			product.AddProduct(new_pr)
+			fmt.Println("\nДобавлен товар:")
+			fmt.Println(new_pr)
 		default:
 			fmt.Println("Нет такого пункта меню!")
 		}
