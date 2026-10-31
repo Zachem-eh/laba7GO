@@ -23,7 +23,7 @@ func clear_screen() {
 }
 
 func main() {
-	first, _ := product.NewProduct("Пакет", 12)
+	first, _ := product.NewProduct("Пакет для покупок", 12)
 	product.AddProduct(first)
 
 	reader := bufio.NewReader(os.Stdin)
@@ -50,8 +50,8 @@ func main() {
 		case 0:
 			return
 		case 1:
-			fmt.Println("Все")
-			fmt.Println(product.AllProduts)
+			fmt.Println("Ассортимент продуктов:")
+			product.PrintAllProducts()
 		default:
 			fmt.Println("Нет такого пункта меню!")
 		}

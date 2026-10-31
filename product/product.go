@@ -60,3 +60,10 @@ func AddProduct(p *Product) error {
 	AllProduts[p.ID] = *p
 	return nil
 }
+
+func PrintAllProducts() {
+	for _, p := range AllProduts {
+		fmt.Println(p)
+		fmt.Println("--------")
+	}
+}
