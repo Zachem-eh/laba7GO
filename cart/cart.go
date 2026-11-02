@@ -43,9 +43,9 @@ func MakeOrder(reader *bufio.Reader, products map[uint]product.Product) {
 		return
 	}
 	for _, id := range ids {
-		item, ok := products[uint(id)]
-		if !ok || id <= 0 {
-			fmt.Printf("товар с ID %d не найден\n", id)
+		item, err := product.GetProductByID(uint(id))
+		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 		basket = append(basket, item)

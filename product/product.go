@@ -54,7 +54,7 @@ func NewProduct(name string, price float64) (*Product, error) {
 func GetProductByID(id uint) (Product, error) {
 	p, exists := AllProducts[id]
 	if !exists {
-		return Product{}, fmt.Errorf("товар не найден")
+		return Product{}, fmt.Errorf("товар с ID = %d не найден", id)
 	}
 	return p, nil
 }
