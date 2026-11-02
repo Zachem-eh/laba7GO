@@ -1,6 +1,11 @@
 package product
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 func init() {
 	first, _ := NewProduct("Пакет для покупок", 12)
@@ -73,4 +78,26 @@ func PrintAllProducts() {
 		fmt.Println(p)
 		fmt.Println("--------")
 	}
+}
+
+func InputNewProduct(reader *bufio.Reader) error {
+	fmt.Println("\nВведите название:")
+	name, _ := reader.ReadString('\n')
+	name = strings.TrimSpace(name)
+
+	fmt.Println("\nВведите цену:")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	price, err := strconv.ParseFloat(input, 64)
+	if err != nil {
+		return fmt.Errorf("Некорректный ввод! Пожалуйста, введите для цены положительное число.")
+	}
+	new_pr, err := NewProduct(name, price)
+	if err != nil {
+		return err
+	}
+	AddProduct(new_pr)
+	fmt.Println("\nДобавлен товар:")
+	fmt.Println(new_pr)
+	return nil
 }
