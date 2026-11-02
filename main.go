@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"laba7/cart"
 	"laba7/product"
+	"laba7/receipt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -32,6 +34,9 @@ func main() {
 		fmt.Println("Меню команд:")
 		fmt.Println("1 - Вывести ассортимент")
 		fmt.Println("2 - Добавить товар в ассортимент")
+		fmt.Println("3 - Добавить товар в корзину")
+		fmt.Println("4 - Вывести корзину")
+		fmt.Println("5 - Очистить корзину")
 		fmt.Println("0 - Завершить работу")
 		fmt.Println("Выберите пункт из меню управления: ")
 
@@ -71,6 +76,13 @@ func main() {
 			product.AddProduct(new_pr)
 			fmt.Println("\nДобавлен товар:")
 			fmt.Println(new_pr)
+		case 3:
+			cart.MakeOrder(reader, product.AllProducts)
+		case 4:
+			receipt.PrintBasket()
+		case 5:
+			cart.DeleteBasket()
+			fmt.Println("Корзина очищена.")
 		default:
 			fmt.Println("Нет такого пункта меню!")
 		}
