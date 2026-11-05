@@ -1,19 +1,30 @@
+// Package cart описывает корзину покупателя: добавление товаров из
+// ассортимента, очистку и расчёт итоговой стоимости с учётом скидок.
 package cart
 
 import (
 	"bufio"
 	"fmt"
 	"io"
-	"laba7/product"
 	"strconv"
 	"strings"
+
+	"laba7/discount"
+	"laba7/internal/storage"
+	"laba7/product"
 )
 
 var basket []product.Product
 
-func MakeOrder(reader *bufio.Reader, products map[uint]product.Product) {
+// MakeOrder показывает ассортимент, читает из reader ID товаров через пробел
+// и добавляет найденные товары в корзину. Если товара с каким-то ID нет,
+// печатает ошибку и переходит к следующему ID.
+func MakeOrder(reader *bufio.Reader) {
 	fmt.Println("Весь ассортимент продуктов:")
-	product.PrintAllProducts()
+	for _, p := range storage.All() {
+		fmt.Println(p)
+		fmt.Println("--------")
+	}
 	fmt.Println("\nВведите ID товаров через пробел:")
 	// parseIDs разбирает строку вида "1 3 3" в срез ID.
 	parseIDs := func(s string) ([]int, error) {
@@ -43,7 +54,11 @@ func MakeOrder(reader *bufio.Reader, products map[uint]product.Product) {
 		return
 	}
 	for _, id := range ids {
-		item, err := product.GetProductByID(uint(id))
+		if id <= 0 {
+			fmt.Printf("ID должен быть положительным, получено %d\n", id)
+			continue
+		}
+		item, err := storage.Find(uint(id))
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -51,9 +66,30 @@ func MakeOrder(reader *bufio.Reader, products map[uint]product.Product) {
 		basket = append(basket, item)
 	}
 }
+
+// GetBasket возвращает копию содержимого корзины.
 func GetBasket() []product.Product {
-	return basket
+	out := make([]product.Product, len(basket))
+	copy(out, basket)
+	return out
 }
+
+// DeleteBasket очищает корзину.
 func DeleteBasket() {
 	basket = nil
+}
+
+// Total возвращает итоговую стоимость корзины: modifier применяется к цене
+// каждого товара по очереди, в порядке добавления в корзину, и полученные
+// цены складываются. Если modifier равен nil, цены берутся без изменений.
+func Total(modifier discount.PriceModifier) float64 {
+	sum := 0.0
+	for _, p := range basket {
+		price := p.Price
+		if modifier != nil {
+			price = modifier(price)
+		}
+		sum += price
+	}
+	return sum
 }

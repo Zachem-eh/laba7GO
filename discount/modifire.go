@@ -45,6 +45,21 @@ func WithMinimumPrice(minPrice float64) PriceModifier {
 	}
 }
 
+// WithLimitedDiscount возвращает модификатор, который уменьшает цену на percent
+// процентов только при первых limit вызовах, а дальше оставляет цену без
+// изменений. Счётчик used захватывается замыканием и сохраняется между вызовами.
+func WithLimitedDiscount(percent float64, limit int) PriceModifier {
+	used := 0
+	discount := WithDiscount(percent)
+	return func(price float64) float64 {
+		if used < limit {
+			used++
+			return discount(price)
+		}
+		return price
+	}
+}
+
 // CombineModifiers — функция высшего порядка: объединяет modifiers в один модификатор,
 // который применяет их по очереди в переданном порядке.
 func CombineModifiers(modifiers ...PriceModifier) PriceModifier {

@@ -1,30 +1,40 @@
+// Package receipt печатает чек по содержимому корзины в виде таблицы
+// (пакет text/tabwriter).
 package receipt
 
 import (
 	"fmt"
-	"laba7/cart"
 	"os"
 	"text/tabwriter"
+
+	"laba7/cart"
+	"laba7/discount"
 )
 
-func PrintBasket() {
+// PrintBasket печатает чек: таблицу товаров корзины и итоговую сумму.
+// Если modifier не равен nil (введён промокод code), дополнительно
+// печатаются скидка и сумма к оплате с учётом modifier.
+func PrintBasket(modifier discount.PriceModifier, code string) {
 	fmt.Println("=== Чек ===")
-	var cartTotal float64
 	myBasket := cart.GetBasket()
 	if len(myBasket) == 0 {
 		fmt.Println("Корзина пуста.")
 		return
-	} else {
-		// Параметры: os.Stdout (куда писать), 0 (minwidth), 0 (tabwidth), 3 (padding), ' ' (padchar), 0 (flags)
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		fmt.Fprintln(w, "ID\tНАЗВАНИЕ\tЦЕНА\t")
-		fmt.Fprintln(w, "--\t--------\t-----\t")
+	}
+	// Параметры: os.Stdout (куда писать), 0 (minwidth), 0 (tabwidth), 3 (padding), ' ' (padchar), 0 (flags)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+	fmt.Fprintln(w, "ID\tНАЗВАНИЕ\tЦЕНА\t")
+	fmt.Fprintln(w, "--\t--------\t-----\t")
+	for _, p := range myBasket {
+		fmt.Fprintf(w, "%d\t%s\t%.2f\t\n", p.ID, p.Name, p.Price)
+	}
+	w.Flush()
 
-		for i := 0; i < len(myBasket); i++ {
-			fmt.Fprintf(w, "%d\t%s\t%.2f\t\n", (myBasket)[i].ID, (myBasket)[i].Name, (myBasket)[i].Price)
-			cartTotal += (myBasket)[i].Price
-		}
-		fmt.Fprintf(w, "Итого: %.2f\n", cartTotal)
-		w.Flush()
+	full := cart.Total(nil)
+	fmt.Printf("Сумма: %.2f\n", full)
+	if modifier != nil {
+		total := cart.Total(modifier)
+		fmt.Printf("Промокод %s, скидка: %.2f\n", code, full-total)
+		fmt.Printf("Итого к оплате: %.2f\n", total)
 	}
 }

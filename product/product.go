@@ -1,86 +1,44 @@
+// Package product описывает товары магазина: тип Product (товар
+// ассортимента) и тип Item (товар с количеством).
+//
+// Хранением товаров пакет не занимается: каталог лежит в internal/storage.
 package product
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-func init() {
-	first, _ := NewProduct("Пакет для покупок", 12)
-	AddProduct(first)
-	second, _ := NewProduct("Левый тапок", 49)
-	AddProduct(second)
-	third, _ := NewProduct("Правый тапок", 51)
-	AddProduct(third)
-}
-
+// Product — товар ассортимента.
 type Product struct {
 	ID    uint
 	Name  string
 	Price float64
 }
 
+// String реализует fmt.Stringer: описание товара в несколько строк.
 func (pr Product) String() string {
 	return fmt.Sprintf("ID товара: %d\nНазвание товара: %s\nЦена: %.2f", pr.ID, pr.Name, pr.Price)
 }
 
-var AllProducts = make(map[uint]Product)
-
-func GetNextID() uint {
-	var maxID uint = 0
-	for id := range AllProducts {
-		if id > maxID {
-			maxID = id
-		}
-	}
-	return maxID + 1
-}
-
-func NewProduct(name string, price float64) (*Product, error) {
+// NewProduct создаёт товар с названием name и ценой price и проверяет данные.
+// ID у нового товара равен 0: настоящий ID выдаёт хранилище при добавлении.
+func NewProduct(name string, price float64) (Product, error) {
 	if name == "" {
-		return nil, fmt.Errorf("Имя товара не должно быть пустым")
+		return Product{}, errors.New("имя товара не должно быть пустым")
 	}
 	if price < 0 {
-		return nil, fmt.Errorf("Цена не может быть отрицательной")
+		return Product{}, errors.New("цена не может быть отрицательной")
 	}
-
-	// Автоматически генерируем ID
-	newID := GetNextID()
-
-	return &Product{
-		ID:    newID,
-		Name:  name,
-		Price: price,
-	}, nil
+	return Product{Name: name, Price: price}, nil
 }
 
-func GetProductByID(id uint) (Product, error) {
-	p, exists := AllProducts[id]
-	if !exists {
-		return Product{}, fmt.Errorf("товар с ID = %d не найден", id)
-	}
-	return p, nil
-}
-
-// Добавление
-func AddProduct(p *Product) error {
-	if _, exists := AllProducts[p.ID]; exists {
-		return fmt.Errorf("товар с ID %d уже существует", p.ID)
-	}
-	AllProducts[p.ID] = *p
-	return nil
-}
-
-func PrintAllProducts() {
-	for _, p := range AllProducts {
-		fmt.Println(p)
-		fmt.Println("--------")
-	}
-}
-
-func InputNewProduct(reader *bufio.Reader) error {
+// ReadProduct спрашивает у пользователя название и цену товара, читает их
+// из reader и возвращает новый товар (ещё без ID).
+func ReadProduct(reader *bufio.Reader) (Product, error) {
 	fmt.Println("\nВведите название:")
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
@@ -90,14 +48,7 @@ func InputNewProduct(reader *bufio.Reader) error {
 	input = strings.TrimSpace(input)
 	price, err := strconv.ParseFloat(input, 64)
 	if err != nil {
-		return fmt.Errorf("Некорректный ввод! Пожалуйста, введите для цены положительное число.")
+		return Product{}, errors.New("некорректный ввод: цена должна быть числом")
 	}
-	new_pr, err := NewProduct(name, price)
-	if err != nil {
-		return err
-	}
-	AddProduct(new_pr)
-	fmt.Println("\nДобавлен товар:")
-	fmt.Println(new_pr)
-	return nil
+	return NewProduct(name, price)
 }
